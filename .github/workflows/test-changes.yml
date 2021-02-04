@@ -29,7 +29,7 @@ jobs:
       run: nosetests -v petl --with-coverage --cover-package=petl
 
     - name: Test documentation inside source code
-      if: python-version >= '3.4'
+      if: matrix.python-version >= '3.4'
       run: nosetests -v --with-coverage --cover-package=petl --with-doctest --doctest-options=+NORMALIZE_WHITESPACE petl -I"csv_py2\.py" -I"db\.py"
 
     - name: Show source code coverage
@@ -37,7 +37,7 @@ jobs:
 
     - name: Coveralls
       uses: coverallsapp/github-action@master
-      if: python-version == '3.8'
+      if: matrix.python-version == '3.8'
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         # path-to-lcov: './lcov.info'
