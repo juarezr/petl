@@ -26,7 +26,7 @@ jobs:
         if [ -f requirements-tests.txt ]; then pip install -r requirements-tests.txt; fi
 
     - name: Setup petl package
-      run: setup.py sdist bdist_wheel
+      run: python setup.py sdist bdist_wheel
 
     - name: Test python source code
       run: nosetests -v petl --with-coverage --cover-package=petl
