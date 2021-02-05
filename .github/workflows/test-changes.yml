@@ -64,9 +64,9 @@ jobs:
         if [ -f requirements-docs.txt ]; then pip install -r requirements-docs.txt; fi
 
     - name: Setup petl package
-      run: python setup.py sdist bdist_wheel
+      run: python setup.py build
 
     - name: Test docs generation
       run: |
         cd docs
-        sphinx-build -W -b singlehtml -d build/doctrees .  build/singlehtml
+        sphinx-build -W -b singlehtml -d ../build/doctrees . ../build/singlehtml
