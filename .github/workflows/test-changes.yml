@@ -1,4 +1,4 @@
-# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions and Operating Systems
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
 name: Test Changes
@@ -6,24 +6,60 @@ name: Test Changes
 on: [push, pull_request]
 
 jobs:
-  test-source-code:
+  run-guard:
+    # it succeeds if any of the following conditions are met:
+    #   - when the PR is not a draft and is not labeled 'prevent-ci'
+    #   - when the PR is labeled 'force-ci'
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [2.7, 3.6, 3.7, 3.8, 3.9]
+    if: |
+      (  (!github.event.pull_request.draft) &&
+         (github.event.action != 'labeled') &&
+         (!contains( github.event.pull_request.labels.*.name, 'prevent-ci')) )
+      || ((github.event.action != 'labeled') && contains( github.event.pull_request.labels.*.name, 'force-ci'))
+      || (github.event.label.name == 'force-ci')
+    steps:
+      - name: Checking if CI shoud run for this push/PR...
+        run: echo Resuming CI. continuing on next job...
 
+  test-source-code:
+    needs: run-guard
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ "ubuntu-latest", "windows-latest", "macos-latest" ]
+        version: [2.7, 3.6, 3.7, 3.8, 3.9]
+        include:
+          - os: "ubuntu-20.04"
+            plataform: linux
+          - os: "windows-latest"
+            plataform: windows
+          - os: "macos-latest"
+            plataform: macos
+        exclude:
+          - os: "windows-latest" 
+            version: 2.7
+          - os: "macos-latest" 
+            version: 2.7
+
+    runs-on: "${{ matrix.os }}"
     steps:
     - uses: actions/checkout@v2
 
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Install linux tools
+      if: matrix.plataform == 'linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends lcov
+
+    - name: Set up Python ${{ matrix.version }}
       uses: actions/setup-python@v2
       with:
-        python-version: ${{ matrix.python-version }}
+        version: ${{ matrix.version }}
 
     - name: Install test dependencies
       run: |
         python -m pip install --upgrade pip
-        if [ -f requirements-tests.txt ]; then pip install -r requirements-tests.txt; fi
+        python -m pip install -r requirements-tests.txt
 
     - name: Setup petl package
       run: python setup.py sdist bdist_wheel
@@ -32,39 +68,44 @@ jobs:
       run: nosetests -v petl --with-coverage --cover-package=petl
 
     - name: Install doctest dependencies
-      run: if [ -f requirements-doctests.txt ]; then pip install -r requirements-doctests.txt; fi
+      run: python -m pip install -r requirements-doctests.txt
 
     - name: Test documentation inside source code
-      if: matrix.python-version >= '3.6'
+      if: matrix.version >= '3.6'
       run: nosetests -v --with-coverage --cover-package=petl --with-doctest --doctest-options=+NORMALIZE_WHITESPACE petl -I"csv_py2\.py" -I"db\.py"
 
-    - name: Show source code coverage
+    - name: Print source code coverage
       run: coverage report -m
+
+    - name: Convert source code coverage to  LCOV
+      if: matrix.plataform == 'linux'
+      run: lcov --capture --directory . -b . --output-file build/lcov.info
 
     - name: Coveralls
       uses: coverallsapp/github-action@master
-      if: matrix.python-version == '3.8'
+      if: matrix.plataform == 'linux' && matrix.version == '3.8'
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        # path-to-lcov: './lcov.info'
+        path-to-lcov: 'build/lcov.info'
 
   test-documentation:
+    needs: run-guard
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.8]
+        version: [3.8]
 
     steps:
     - uses: actions/checkout@v2
 
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python ${{ matrix.version }}
       uses: actions/setup-python@v2
       with:
-        python-version: ${{ matrix.python-version }}
+        version: ${{ matrix.version }}
 
     - name: Install doc generation dependencies
       run: |
-        if [ -f requirements-docs.txt ]; then pip install -r requirements-docs.txt; fi
+        python -m pip install -r requirements-docs.txt
 
     - name: Setup petl package
       run: python setup.py build
