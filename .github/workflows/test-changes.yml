@@ -39,7 +39,7 @@ jobs:
           - os: "windows-latest" 
             version: 2.7
           - os: "macos-latest" 
-            version: 2.7
+            version: [2.7, 3.9]
 
     runs-on: "${{ matrix.os }}"
     steps:
@@ -79,7 +79,9 @@ jobs:
 
     - name: Convert source code coverage to  LCOV
       if: matrix.plataform == 'linux'
-      run: lcov --capture --directory . -b . --output-file build/lcov.info
+      run: |
+        ls -l build/
+        lcov --capture --directory . -b . --output-file build/lcov.info
 
     - name: Coveralls
       uses: coverallsapp/github-action@master
