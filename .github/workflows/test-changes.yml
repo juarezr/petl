@@ -29,7 +29,7 @@ jobs:
         os: [ "ubuntu-latest", "windows-latest", "macos-latest" ]
         version: [2.7, 3.6, 3.7, 3.8, 3.9]
         include:
-          - os: "ubuntu-20.04"
+          - os: "ubuntu-latest"
             plataform: linux
           - os: "windows-latest"
             plataform: windows
@@ -54,7 +54,7 @@ jobs:
     - name: Set up Python ${{ matrix.version }}
       uses: actions/setup-python@v2
       with:
-        version: ${{ matrix.version }}
+        python-version: ${{ matrix.version }}
 
     - name: Install test dependencies
       run: |
@@ -71,7 +71,7 @@ jobs:
       run: python -m pip install -r requirements-doctests.txt
 
     - name: Test documentation inside source code
-      if: matrix.version >= '3.6'
+      if: matrix.version >= '3.6' && matrix.version < '3.9'
       run: nosetests -v --with-coverage --cover-package=petl --with-doctest --doctest-options=+NORMALIZE_WHITESPACE petl -I"csv_py2\.py" -I"db\.py"
 
     - name: Print source code coverage
@@ -101,7 +101,7 @@ jobs:
     - name: Set up Python ${{ matrix.version }}
       uses: actions/setup-python@v2
       with:
-        version: ${{ matrix.version }}
+        python-version: ${{ matrix.version }}
 
     - name: Install doc generation dependencies
       run: |
