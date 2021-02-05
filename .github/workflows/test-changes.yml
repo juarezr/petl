@@ -32,7 +32,7 @@ jobs:
       run: nosetests -v petl --with-coverage --cover-package=petl
 
     - name: Test documentation inside source code
-      if: matrix.python-version >= '3.4'
+      if: matrix.python-version >= '3.6'
       run: nosetests -v --with-coverage --cover-package=petl --with-doctest --doctest-options=+NORMALIZE_WHITESPACE petl -I"csv_py2\.py" -I"db\.py"
 
     - name: Show source code coverage
@@ -63,5 +63,10 @@ jobs:
       run: |
         if [ -f requirements-docs.txt ]; then pip install -r requirements-docs.txt; fi
 
+    - name: Setup petl package
+      run: python setup.py sdist bdist_wheel
+
     - name: Test docs generation
-      run: sphinx-build -W -b singlehtml -d build/doctrees .  build/singlehtml
+      run: |
+        cd docs
+        sphinx-build -W -b singlehtml -d build/doctrees .  build/singlehtml
