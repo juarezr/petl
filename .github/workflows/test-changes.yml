@@ -31,6 +31,9 @@ jobs:
     - name: Test python source code
       run: nosetests -v petl --with-coverage --cover-package=petl
 
+    - name: Install doctest dependencies
+      run: if [ -f requirements-doctests.txt ]; then pip install -r requirements-doctests.txt; fi
+
     - name: Test documentation inside source code
       if: matrix.python-version >= '3.6'
       run: nosetests -v --with-coverage --cover-package=petl --with-doctest --doctest-options=+NORMALIZE_WHITESPACE petl -I"csv_py2\.py" -I"db\.py"
