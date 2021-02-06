@@ -19,7 +19,7 @@ jobs:
       || (github.event.label.name == 'force-ci')
     steps:
       - name: Checking if CI shoud run for this push/PR...
-        run: echo Resuming CI. continuing on next job...
+        run: echo Resuming CI. Continuing next jobs...
 
   test-source-code:
     needs: run-guard
@@ -31,15 +31,7 @@ jobs:
         doctest: [ true ]
         coveralls: [ false ]
         include:
-          - os: "ubuntu-latest"
-            plataform: linux
-          - os: "windows-latest"
-            plataform: windows
-          - os: "macos-latest"
-            plataform: macos
           # disabling doctest due to failures
-          - python: 2.7
-            doctest: false
           - os: "windows-latest"
             python: 3.6
             doctest: false
@@ -59,7 +51,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Install linux tools
-      if: matrix.plataform == 'linux'
+      if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
         sudo apt-get install -y --no-install-recommends python3-h5py
@@ -81,11 +73,11 @@ jobs:
       run: nosetests -v petl --with-coverage --cover-package=petl
 
     - name: Install doctest dependencies
-      if: matrix.doctest
+      if: matrix.doctest && matrix.python >= '3.6'
       run: python -m pip install -r requirements-doctests.txt
 
     - name: Test documentation inside source code
-      if: matrix.doctest
+      if: matrix.doctest && matrix.python >= '3.6'
       run: nosetests -v --with-coverage --cover-package=petl --with-doctest --doctest-options=+NORMALIZE_WHITESPACE petl -I"csv_py2\.py" -I"db\.py"
 
     - name: Print source code coverage
