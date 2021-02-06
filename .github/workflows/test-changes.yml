@@ -80,15 +80,16 @@ jobs:
     - name: Convert source code coverage to  LCOV
       if: matrix.plataform == 'linux'
       run: |
+        coverage xml -o build/coverage.xml
+        # lcov --capture --directory . -b . --output-file build/lcov.info
         ls -l build/
-        lcov --capture --directory . -b . --output-file build/lcov.info
 
     - name: Coveralls
       uses: coverallsapp/github-action@master
       if: matrix.plataform == 'linux' && matrix.version == '3.8'
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        path-to-lcov: 'build/lcov.info'
+        path-to-lcov: 'build/coverage.xml'
 
   test-documentation:
     needs: run-guard
