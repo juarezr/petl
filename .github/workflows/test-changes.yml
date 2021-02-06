@@ -28,19 +28,17 @@ jobs:
       matrix:
         os: [ "ubuntu-latest", "windows-latest", "macos-latest" ]
         python: [2.7, 3.6, 3.7, 3.8, 3.9]
-        doctest: [ true ]
-        coveralls: [ false ]
         include:
           # disabling doctest due to failures
           - os: "windows-latest"
             python: 3.6
-            doctest: false
+            skip_doctest: true
           - os: "windows-latest"
             python: 3.7
-            doctest: false
+            skip_doctest: true
           - os: "macos-latest"
             python: 3.9
-            doctest: false
+            skip_doctest: true
           # which job will send coverage
           - os: "ubuntu-latest"
             python: 3.8
@@ -73,11 +71,11 @@ jobs:
       run: nosetests -v petl --with-coverage --cover-package=petl
 
     - name: Install doctest dependencies
-      if: matrix.doctest && matrix.python >= '3.6'
+      if: ! matrix.skip_doctest && matrix.python >= '3.6'
       run: python -m pip install -r requirements-doctests.txt
 
     - name: Test documentation inside source code
-      if: matrix.doctest && matrix.python >= '3.6'
+      if: ! matrix.skip_doctest && matrix.python >= '3.6'
       run: nosetests -v --with-coverage --cover-package=petl --with-doctest --doctest-options=+NORMALIZE_WHITESPACE petl -I"csv_py2\.py" -I"db\.py"
 
     - name: Print source code coverage
