@@ -28,71 +28,67 @@ jobs:
       matrix:
         os: [ "ubuntu-latest", "windows-latest", "macos-latest" ]
         python: [2.7, 3.6, 3.7, 3.8, 3.9]
-        include:
-          # disabling doctest due to failures
-          - os: "windows-latest"
-            python: 3.6
-            skip_doctest: true
-          - os: "windows-latest"
-            python: 3.7
-            skip_doctest: true
-          - os: "macos-latest"
-            python: 3.9
-            skip_doctest: true
-          # which job will send coverage
-          - os: "ubuntu-latest"
-            python: 3.8
-            coveralls: true
-
     runs-on: "${{ matrix.os }}"
+    env:
+      doctest: "true"
     steps:
-    - uses: actions/checkout@v2
+      - name: Checkout source code
+        uses: actions/checkout@v2
 
-    - name: Install linux tools
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y --no-install-recommends python3-h5py
+      - name: Evaluate when doctest
+        if: |
+          matrix.os == 'windows-latest' && (matrix.python == '3.6' || matrix.python == '3.7' ) ||
+          matrix.os == 'macos-latest' && matrix.python == '3.9' ||
+          matrix.python == '2.7'
+        run: |
+          echo "::set-env name=doctest::false"
+          echo "Skipping doctest due to failures in setup of some packages."
 
-    - name: Set up Python ${{ matrix.python }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python }}
+      - name: Install linux tools
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends python3-h5py
 
-    - name: Install test dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install -r requirements-tests.txt
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python }}
 
-    - name: Setup petl package
-      run: python setup.py sdist bdist_wheel
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-tests.txt
 
-    - name: Test python source code
-      run: nosetests -v petl --with-coverage --cover-package=petl
+      - name: Setup petl package
+        run: python setup.py sdist bdist_wheel
 
-    - name: Install doctest dependencies
-      if: ! matrix.skip_doctest && matrix.python >= '3.6'
-      run: python -m pip install -r requirements-doctests.txt
+      - name: Test python source code
+        run: nosetests -v petl --with-coverage --cover-package=petl
 
-    - name: Test documentation inside source code
-      if: ! matrix.skip_doctest && matrix.python >= '3.6'
-      run: nosetests -v --with-coverage --cover-package=petl --with-doctest --doctest-options=+NORMALIZE_WHITESPACE petl -I"csv_py2\.py" -I"db\.py"
+      - name: Install doctest dependencies - ${{ env.doctest }}
+        if: env.doctest != 'false'
+        run: python -m pip install -r requirements-doctests.txt
 
-    - name: Print source code coverage
-      run: coverage report -m
+      - name: Test documentation inside source code - ${{ env.doctest }}
+        if: env.doctest != 'false'
+        run: nosetests -v --with-coverage --cover-package=petl --with-doctest --doctest-options=+NORMALIZE_WHITESPACE petl -I"csv_py2\.py" -I"db\.py"
 
-    - name: Export source code coverage to XML
-      if: matrix.coveralls
-      run: |
-        coverage xml -o build/coverage.xml
-        ls -l build/
+      - name: Print source code coverage
+        run: coverage report -m
 
-    - name: Coveralls
-      uses: coverallsapp/github-action@master
-      if: matrix.coveralls
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        path-to-lcov: 'build/coverage.xml'
+      - name: Export source code coverage to XML
+        if: matrix.coveralls
+        run: |
+          coverage xml -o build/coverage.xml
+          ls -l build/
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        if: matrix.coveralls
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: 'build/coverage.xml'
 
   test-documentation:
     needs: run-guard
@@ -102,21 +98,22 @@ jobs:
         python: [3.8]
 
     steps:
-    - uses: actions/checkout@v2
+      - name: Checkout source code
+        uses: actions/checkout@v2
 
-    - name: Set up Python ${{ matrix.python }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python }}
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python }}
 
-    - name: Install doc generation dependencies
-      run: |
-        python -m pip install -r requirements-docs.txt
+      - name: Install doc generation dependencies
+        run: |
+          python -m pip install -r requirements-docs.txt
 
-    - name: Setup petl package
-      run: python setup.py build
+      - name: Setup petl package
+        run: python setup.py build
 
-    - name: Test docs generation
-      run: |
-        cd docs
-        sphinx-build -W -b singlehtml -d ../build/doctrees . ../build/singlehtml
+      - name: Test docs generation
+        run: |
+          cd docs
+          sphinx-build -W -b singlehtml -d ../build/doctrees . ../build/singlehtml
