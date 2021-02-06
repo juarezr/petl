@@ -56,17 +56,16 @@ jobs:
       - name: Test python source code
         run: nosetests -v petl --with-coverage --cover-package=petl
 
+      - name: Print source code coverage
+        run: coverage report -m
+
       - name: Test documentation inside source code
         if: |
-          matrix.python >= '3.6' ||
-          matrix.os == 'windows-latest' && matrix.python >= '3.8' ||
-          matrix.os == 'macos-latest' && matrix.python != '3.9'
+          matrix.python >= '3.6' && matrix.python != '3.9' &&
+          (matrix.os != 'windows-latest' || matrix.python == '3.8')
         run: |
           python -m pip install -r requirements-doctests.txt
           coverage run -m nose -v --with-coverage --cover-package=petl --with-doctest --doctest-options=+NORMALIZE_WHITESPACE petl -I"csv_py2\.py" -I"db\.py"
-
-      - name: Print source code coverage
-        run: coverage report -m
 
       - name: Export source code coverage to XML
         run: |
