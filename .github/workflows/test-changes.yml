@@ -53,14 +53,12 @@ jobs:
 
       - name: Setup environment variables for remote filesystem testing
         if: matrix.os == 'ubuntu-latest' && matrix.python == '3.8'
-        env:
-          SMB: "smb://WORKGROUP;user1:pass1@localhost/public/"
-          SFTP: "sftp://user1:pass1@localhost:2244/public/"
         run: |
-          echo "Setup SMB at: ${{ env.SMB }}$"
-          echo ::set-env name=PETL_TEST_SMB::${SMB:1}
-          echo "Setup SFTP at: ${{ env.SFTP }}$"
-          echo ::set-env name=PETL_TEST_SFTP::${SFTP:1}
+          echo "Setup SMB environment variable to trigger testing in Petl"
+          echo 'PETL_TEST_SMB=smb://WORKGROUP;user1:pass1@localhost/public/' >> $GITHUB_ENV
+          echo "Setup SFTP environment variable to trigger testing in Petl"
+          echo 'PETL_TEST_SFTP=sftp://user1:pass1@localhost:2244/public/' >> $GITHUB_ENV
+          python -m pip install -r requirements-remote.txt
 
       - name: Install containers for remote filesystem testing
         if: matrix.os == 'ubuntu-latest' && matrix.python == '3.8'
