@@ -35,7 +35,7 @@ jobs:
       testing: simple
         
     steps:
-      - name: Determine the scope of testing is available on ${{ matrix.os }}
+      - name: Determine what scope of testing is available on ${{ matrix.os }}
         if: |
           matrix.python >= '3.6' && matrix.python != '3.9' &&
           (matrix.os != 'windows-latest' || matrix.python == '3.8')
@@ -72,6 +72,13 @@ jobs:
           python -m pip install -r requirements-remote.txt
           echo "::endgroup::"
 
+      - name: Install optinal test dependencies for mode ${{ env.testing }}
+        if: matrix.os == 'ubuntu-latest' && env.testing == 'full'
+        run: |
+          echo "::group::Install database test dependencies"
+          python -m pip install -r requirements-optional.txt
+          echo "::endgroup::"
+
       - name: Install containers for remote filesystem testing
         if: matrix.os == 'ubuntu-latest' && matrix.python == '3.8'
         run: |
@@ -98,11 +105,11 @@ jobs:
       - name: Setup petl package
         run: python setup.py sdist bdist_wheel
 
-      - name: Test python source code
+      - name: Test python source code for mode ${{ env.testing }}
         if: env.testing == 'simple'
         run: nosetests -v petl --with-coverage --cover-package=petl
 
-      - name: Test documentation inside source code
+      - name: Test documentation inside source code for mode ${{ env.testing }}
         if: env.testing == 'full'
         run: |
           echo "::group::Install database test dependencies"
