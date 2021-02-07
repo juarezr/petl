@@ -31,7 +31,17 @@ jobs:
 
     runs-on: "${{ matrix.os }}"
 
+    env:
+      testing: simple
+        
     steps:
+      - name: Determine the scope of testing is available on ${{ matrix.os }}
+        if: |
+          matrix.python >= '3.6' && matrix.python != '3.9' &&
+          (matrix.os != 'windows-latest' || matrix.python == '3.8')
+        run: |
+          echo 'testing=full' >> $GITHUB_ENV
+
       - name: Checkout source code
         uses: actions/checkout@v2
 
@@ -89,15 +99,11 @@ jobs:
         run: python setup.py sdist bdist_wheel
 
       - name: Test python source code
+        if: env.testing == 'simple'
         run: nosetests -v petl --with-coverage --cover-package=petl
 
-      - name: Print source code coverage
-        run: coverage report -m
-
       - name: Test documentation inside source code
-        if: |
-          matrix.python >= '3.6' && matrix.python != '3.9' &&
-          (matrix.os != 'windows-latest' || matrix.python == '3.8')
+        if: env.testing == 'full'
         run: |
           echo "::group::Install database test dependencies"
           python -m pip install -r requirements-doctests.txt
@@ -113,6 +119,9 @@ jobs:
         run: |
           python -m pip install --upgrade coveralls
           coveralls --service=github
+
+      - name: Print source code coverage
+        run: coverage report -m
 
   test-documentation:
     needs: run-guard
