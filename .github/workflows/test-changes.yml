@@ -102,7 +102,7 @@ jobs:
           echo "::group::Install database test dependencies"
           python -m pip install -r requirements-doctests.txt
           echo "::endgroup::"
-          echo "::group::Install database test dependencies"
+          echo "::group::Perform doc test execution with coverage"
           nosetests -v --with-coverage --cover-package=petl --with-doctest --doctest-options=+NORMALIZE_WHITESPACE petl -I"csv_py2\.py" -I"db\.py"
           echo "::endgroup::"
 
