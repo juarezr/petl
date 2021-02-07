@@ -28,16 +28,8 @@ jobs:
       matrix:
         os: [ "ubuntu-latest", "windows-latest", "macos-latest" ]
         python: [2.7, 3.6, 3.7, 3.8, 3.9]
-        include:
-          - os: "ubuntu-latest"
-            python: 3.8
-            smb: "smb://WORKGROUP;user1:pass1@localhost/public/"
-            sftp: "sftp://user1:pass1@localhost/public/"
 
     runs-on: "${{ matrix.os }}"
-    env:
-      PETL_TEST_SMB: ${{ matrix.smb }}
-      PETL_TEST_SFTP: ${{ matrix.sftp }}
 
     steps:
       - name: Checkout source code
@@ -59,11 +51,24 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements-tests.txt
 
+      - name: Setup environment variables for remote filesystem testing
+        if: matrix.os == 'ubuntu-latest' && matrix.python == '3.8'
+        env:
+          SMB: "smb://WORKGROUP;user1:pass1@localhost/public/"
+          SFTP: "sftp://user1:pass1@localhost:2244/public/"
+        run: |
+          echo "Setup SMB at: ${{ env.SMB }}$"
+          echo ::set-env name=PETL_TEST_SMB::${SMB:1}
+          echo "Setup SFTP at: ${{ env.SFTP }}$"
+          echo ::set-env name=PETL_TEST_SFTP::${SFTP:1}
+
       - name: Install containers for remote filesystem testing
         if: matrix.os == 'ubuntu-latest' && matrix.python == '3.8'
         run: |
+          echo "Setup docker for SMB at: ${{ env.PETL_TEST_SMB }}$"
           docker run -it --name samba -p 139:139 -p 445:445 -d "dperson/samba" -p -u "user1;pass1" -s "public;/public-dir;yes;no;yes;all"
-          docker run -it --name sftp -p 22:22 -d atmoz/sftp user2:pass2:::public
+          echo "Setup docker for SFTP at: ${{ env.PETL_TEST_SFTP }}$"
+          docker run -it --name sftp -p 2244:22 -d atmoz/sftp user2:pass2:::public
 
       - name: Install containers for remote database testing
         if: matrix.os == 'ubuntu-latest' && matrix.python >= '3.6'
