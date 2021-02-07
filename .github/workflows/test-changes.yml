@@ -55,25 +55,35 @@ jobs:
         if: matrix.os == 'ubuntu-latest' && matrix.python == '3.8'
         run: |
           echo "Setup SMB environment variable to trigger testing in Petl"
-          echo 'PETL_TEST_SMB=smb://WORKGROUP;user1:pass1@localhost/public/' >> $GITHUB_ENV
+          echo 'PETL_TEST_SMB=smb://WORKGROUP;petl:test@localhost/public/' >> $GITHUB_ENV
           echo "Setup SFTP environment variable to trigger testing in Petl"
-          echo 'PETL_TEST_SFTP=sftp://user1:pass1@localhost:2244/public/' >> $GITHUB_ENV
+          echo 'PETL_TEST_SFTP=sftp://petl:test@localhost:2244/public/' >> $GITHUB_ENV
+          echo "::group::Install remote test dependencies"
           python -m pip install -r requirements-remote.txt
+          echo "::endgroup::"
 
       - name: Install containers for remote filesystem testing
         if: matrix.os == 'ubuntu-latest' && matrix.python == '3.8'
         run: |
-          echo "Setup docker for SMB at: ${{ env.PETL_TEST_SMB }}$"
-          docker run -it --name samba -p 139:139 -p 445:445 -d "dperson/samba" -p -u "user1;pass1" -s "public;/public-dir;yes;no;yes;all"
-          echo "Setup docker for SFTP at: ${{ env.PETL_TEST_SFTP }}$"
-          docker run -it --name sftp -p 2244:22 -d atmoz/sftp user2:pass2:::public
+          echo "::group::Setup docker for SMB at: ${{ env.PETL_TEST_SMB }}$"
+          docker run -it --name samba -p 139:139 -p 445:445 -d "dperson/samba" -p -u "petl;test" -s "public;/public-dir;yes;no;yes;all"
+          echo "::endgroup::"
+          echo "::group::Setup docker for SFTP at: ${{ env.PETL_TEST_SFTP }}$"
+          docker run -it --name sftp -p 2244:22 -d atmoz/sftp petl:test:::public
+          echo "::endgroup::"
 
       - name: Install containers for remote database testing
         if: matrix.os == 'ubuntu-latest' && matrix.python >= '3.6'
         run: |
+          echo "::group::Setup docker for MySQL"
           docker run -it --name mysql -p 3306:3306 -p 33060:33060 -e MYSQL_ROOT_PASSWORD=pass0 -e MYSQL_DATABASE=petl -e MYSQL_USER=petl -e MYSQL_PASSWORD=test -d mysql:latest
+          echo "::endgroup::"
+          echo "::group::Setup docker for Postgres"
           docker run -it --name postgres -p 5432:5432 -e POSTGRES_DB=petl -e POSTGRES_USER=petl -e POSTGRES_PASSWORD=test -d postgres:latest
+          echo "::endgroup::"
+          echo "::group::Install database test dependencies"
           python -m pip install cryptography pymysql SQLAlchemy psycopg2-binary
+          echo "::endgroup::"
 
       - name: Setup petl package
         run: python setup.py sdist bdist_wheel
@@ -89,16 +99,12 @@ jobs:
           matrix.python >= '3.6' && matrix.python != '3.9' &&
           (matrix.os != 'windows-latest' || matrix.python == '3.8')
         run: |
+          echo "::group::Install database test dependencies"
           python -m pip install -r requirements-doctests.txt
-          # coverage run -m nose -v --with-coverage --cover-package=petl --with-doctest --doctest-options=+NORMALIZE_WHITESPACE petl -I"csv_py2\.py" -I"db\.py"
+          echo "::endgroup::"
+          echo "::group::Install database test dependencies"
           nosetests -v --with-coverage --cover-package=petl --with-doctest --doctest-options=+NORMALIZE_WHITESPACE petl -I"csv_py2\.py" -I"db\.py"
-
-      # - name: Coveralls
-      #   if: matrix.os == 'ubuntu-latest' && matrix.python == '3.8'
-      #   # uses: coverallsapp/github-action@master
-      #   uses: AndreMiras/coveralls-python-action@develop
-      #   with:
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+          echo "::endgroup::"
 
       - name: Coveralls
         if: matrix.os == 'ubuntu-latest' && matrix.python == '3.8'
@@ -106,7 +112,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python -m pip install --upgrade coveralls
-          python -m pip list  | grep cover
           coveralls --service=github
 
   test-documentation:
