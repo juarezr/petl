@@ -73,13 +73,12 @@ jobs:
           echo "::endgroup::"
 
       - name: Install optinal test dependencies for mode ${{ env.testing }}
-        if: matrix.os == 'ubuntu-latest' && env.testing == 'full'
-        env:
-          DISABLE_BLOSC_SSE2: 1
-          DISABLE_BLOSC_AVX2: 1
+        if: matrix.os == 'ubuntu-latest' && matrix.python >= '3.7'
         run: |
           echo "::group::Install tricky test dependencies"
           # pip install --prefer-binary -r requirements-optional.txt
+          DISABLE_BLOSC_AVX2=1
+          export DISABLE_BLOSC_AVX2
           pip install --prefer-binary bcolz
           echo "::endgroup::"
 
