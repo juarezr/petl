@@ -74,12 +74,15 @@ jobs:
 
       - name: Install optinal test dependencies for mode ${{ env.testing }}
         if: matrix.os == 'ubuntu-latest' && matrix.python >= '3.7'
+        env:
+          DISABLE_BLOSC_SSE2: 1
+          DISABLE_BLOSC_AVX2: 1
         run: |
           echo "::group::Install tricky test dependencies"
           # pip install --prefer-binary -r requirements-optional.txt
-          DISABLE_BLOSC_AVX2=1
-          export DISABLE_BLOSC_AVX2
-          pip install --prefer-binary bcolz
+          # DISABLE_BLOSC_AVX2=1
+          # export DISABLE_BLOSC_AVX2
+          # pip install --prefer-binary bcolz
           echo "::endgroup::"
 
       - name: Install containers for remote filesystem testing
