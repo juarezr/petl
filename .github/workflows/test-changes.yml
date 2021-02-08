@@ -79,7 +79,8 @@ jobs:
           DISABLE_BLOSC_AVX2: 1
         run: |
           echo "::group::Install tricky test dependencies"
-          pip install --prefer-binary -r requirements-optional.txt
+          # pip install --prefer-binary -r requirements-optional.txt
+          pip install --prefer-binary bcolz
           echo "::endgroup::"
 
       - name: Install containers for remote filesystem testing
@@ -102,7 +103,7 @@ jobs:
           docker run -it --name postgres -p 5432:5432 -e POSTGRES_DB=petl -e POSTGRES_USER=petl -e POSTGRES_PASSWORD=test -d postgres:latest
           echo "::endgroup::"
           echo "::group::Install database test dependencies"
-          python -m pip install cryptography pymysql SQLAlchemy psycopg2-binary
+          python -m pip install -r requirements-database.txt
           echo "::endgroup::"
 
       - name: Setup petl package
