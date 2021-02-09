@@ -75,13 +75,13 @@ jobs:
       - name: Install optinal test dependencies for mode ${{ env.testing }}
         if: matrix.os == 'ubuntu-latest' && matrix.python >= '3.7'
         env:
-          DISABLE_BLOSC_SSE2: 1
           DISABLE_BLOSC_AVX2: 1
         run: |
           echo "::group::Install tricky test dependencies"
-          # pip install --prefer-binary -r requirements-optional.txt
-          # DISABLE_BLOSC_AVX2=1
-          # export DISABLE_BLOSC_AVX2
+          if ! pip install --prefer-binary -r requirements-optional.txt ; then
+            echo 'Dismissed failure installing some optional package.  Resuming tests...'
+          fi
+          # DISABLE_BLOSC_AVX2=1 && export DISABLE_BLOSC_AVX2
           # pip install --prefer-binary bcolz
           echo "::endgroup::"
 
@@ -118,7 +118,7 @@ jobs:
       - name: Test documentation inside source code for mode ${{ env.testing }}
         if: env.testing == 'full'
         run: |
-          echo "::group::Install database test dependencies"
+          echo "::group::Install extra packages test dependencies"
           python -m pip install -r requirements-formats.txt
           echo "::endgroup::"
           echo "::group::Perform doc test execution with coverage"
