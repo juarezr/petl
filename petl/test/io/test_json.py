@@ -339,3 +339,19 @@ def test_fromdicts_generator_missing():
               ('b', 2, "x"),
               ('c', "x", 2))
     ieq(expect, actual)
+
+
+def test_fromdicts_dicts_method():
+    # fromdicts() returns a DictsView whose internal data attribute was named
+    # 'dicts', shadowing the inherited Table.dicts() method.  Calling .dicts()
+    # on the result should return row dicts, not raise TypeError.
+    data = [{'foo': 'a', 'bar': 1},
+            {'foo': 'b', 'bar': 2},
+            {'foo': 'c', 'bar': 2}]
+    actual = fromdicts(data, header=['foo', 'bar'])
+    result = list(actual.dicts())
+    assert result == [
+        {'foo': 'a', 'bar': 1},
+        {'foo': 'b', 'bar': 2},
+        {'foo': 'c', 'bar': 2},
+    ]

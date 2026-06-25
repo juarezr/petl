@@ -194,13 +194,13 @@ def fromdicts(dicts, header=None, sample=1000, missing=None):
 class DictsView(Table):
 
     def __init__(self, dicts, header=None, sample=1000, missing=None):
-        self.dicts = dicts
+        self._dicts = dicts
         self._header = header
         self.sample = sample
         self.missing = missing
 
     def __iter__(self):
-        return iterdicts(self.dicts, self._header, self.sample, self.missing)
+        return iterdicts(self._dicts, self._header, self.sample, self.missing)
 
 
 class DictsGeneratorView(DictsView):
@@ -222,7 +222,7 @@ class DictsGeneratorView(DictsView):
                 self._filecache = NamedTemporaryFile(delete=False, mode='wb+', buffering=0)
 
         position = 0
-        it = iter(self.dicts)
+        it = iter(self._dicts)
         while True:
             if position < self._cached:
                 self._filecache.seek(position)
@@ -241,10 +241,10 @@ class DictsGeneratorView(DictsView):
             yield row
 
     def _determine_header(self):
-        it = iter(self.dicts)
+        it = iter(self._dicts)
         header = list()
         peek, it = iterpeek(it, self.sample)
-        self.dicts = it
+        self._dicts = it
         if isinstance(peek, dict):
             peek = [peek]
         for o in peek:
