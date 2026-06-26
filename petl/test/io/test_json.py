@@ -8,7 +8,7 @@ import json
 import pytest
 
 from petl.test.helpers import ieq
-from petl import fromjson, fromdicts, tojson, tojsonarrays
+from petl import dummytable, fromjson, fromdicts, tojson, tojsonarrays
 
 
 def test_fromjson_1():
@@ -345,13 +345,8 @@ def test_fromdicts_dicts_method():
     # fromdicts() returns a DictsView whose internal data attribute was named
     # 'dicts', shadowing the inherited Table.dicts() method.  Calling .dicts()
     # on the result should return row dicts, not raise TypeError.
-    data = [{'foo': 'a', 'bar': 1},
-            {'foo': 'b', 'bar': 2},
-            {'foo': 'c', 'bar': 2}]
-    actual = fromdicts(data, header=['foo', 'bar'])
+    dummy = dummytable(numrows=3, seed=42)
+    data = list(dummy.dicts())
+    actual = fromdicts(dummy.dicts())
     result = list(actual.dicts())
-    assert result == [
-        {'foo': 'a', 'bar': 1},
-        {'foo': 'b', 'bar': 2},
-        {'foo': 'c', 'bar': 2},
-    ]
+    assert result == data
