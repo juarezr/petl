@@ -342,11 +342,42 @@ def test_fromdicts_generator_missing():
 
 
 def test_fromdicts_dicts_method():
-    # fromdicts() returns a DictsView whose internal data attribute was named
-    # 'dicts', shadowing the inherited Table.dicts() method.  Calling .dicts()
-    # on the result should return row dicts, not raise TypeError.
+    # .dicts() must reach the inherited Table.dicts(), not the input data (#643)
     dummy = dummytable(numrows=3, seed=42)
     data = list(dummy.dicts())
     actual = fromdicts(dummy.dicts())
-    result = list(actual.dicts())
-    assert result == data
+    assert list(actual.dicts()) == data
+
+
+def test_fromdicts_dicts_attribute_reads_as_data():
+    data = [{'foo': 'a', 'bar': 1}, {'foo': 'b', 'bar': 2}]
+    actual = fromdicts(data)
+    assert actual.dicts == data
+    assert list(actual.dicts) == data
+    assert len(actual.dicts) == 2
+    assert actual.dicts[1] == data[1]
+    assert repr(actual.dicts) == repr(data)
+
+
+def test_fromdicts_dicts_attribute_assignment():
+    actual = fromdicts([{'foo': 'a'}])
+    actual.dicts = [{'foo': 'z'}]
+    assert list(actual.dicts) == [{'foo': 'z'}]
+    ieq((('foo',), ('z',)), actual)
+
+
+def test_fromdicts_generator_dicts_method(dicts_generator):
+    actual = fromdicts(dicts_generator)
+    expect = [{'foo': 'a', 'bar': 1},
+              {'foo': 'b', 'bar': 2},
+              {'foo': 'c', 'bar': 2}]
+    assert list(actual.dicts()) == expect
+
+
+def test_fromdicts_generator_dicts_attribute_is_consumable(dicts_generator):
+    # the generator view's .dicts is a one-shot iterator, as it was before
+    actual = fromdicts(dicts_generator)
+    it = actual.dicts
+    assert next(it) == {'foo': 'a', 'bar': 1}
+    assert len(list(it)) == 2
+    assert list(actual.dicts) == []

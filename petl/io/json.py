@@ -191,6 +191,51 @@ def fromdicts(dicts, header=None, sample=1000, missing=None):
     return view(dicts, header=header, sample=sample, missing=missing)
 
 
+class _DictsAttr(object):
+    """Reads as the input data, calls as the inherited Table.dicts() method.
+
+    Only exists to keep `.dicts` working both ways in the v1.x series; v2 can
+    drop it along with the property below.
+    """
+
+    def __init__(self, view):
+        self._view = view
+
+    def __call__(self, *sliceargs, **kwargs):
+        return _dicts(self._view, *sliceargs, **kwargs)
+
+    def __iter__(self):
+        return iter(self._view._dicts)
+
+    def __next__(self):
+        return next(self._view._dicts)
+
+    next = __next__
+
+    def __len__(self):
+        return len(self._view._dicts)
+
+    def __getitem__(self, item):
+        return self._view._dicts[item]
+
+    def __eq__(self, other):
+        return self._view._dicts == other
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __hash__(self):
+        return hash(self._view._dicts)
+
+    def __repr__(self):
+        return repr(self._view._dicts)
+
+    def __getattr__(self, name):
+        if name.startswith('_'):
+            raise AttributeError(name)
+        return getattr(self._view._dicts, name)
+
+
 class DictsView(Table):
 
     def __init__(self, dicts, header=None, sample=1000, missing=None):
@@ -201,6 +246,17 @@ class DictsView(Table):
 
     def __iter__(self):
         return iterdicts(self._dicts, self._header, self.sample, self.missing)
+
+    @property
+    def dicts(self):
+        # `.dicts` was the raw input data, which shadowed Table.dicts() (#643).
+        # A property on the subclass wins over the inherited method, so both
+        # uses keep working until v2.
+        return _DictsAttr(self)
+
+    @dicts.setter
+    def dicts(self, value):
+        self._dicts = value
 
 
 class DictsGeneratorView(DictsView):
