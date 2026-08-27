@@ -19,39 +19,57 @@ Resources
 DevOps Status
 -------------
 
-|downloads| |monthly|
++------------+---------------------+-------------------+
+| Workflow   |.. centered:: Status                     |
++============+=====================+===================+
+| PyPI       |  |pypi_downloads|   |  |pypi_monthly|   |
++------------+---------------------+-------------------+
+| Conda      |  |conda_downloads|  |  |conda_version|  |
++------------+---------------------+-------------------+
+| CI         |  |ga_tests|         |  |ci_coveralls|   |
++------------+---------------------+-------------------+
+| Release    |  |ga_release|       |  |ga_conda|       |
++------------+---------------------+-------------------+
+| Docs       |  |ci_readthedocs|   |   |zenodo|        |
++------------+---------------------+-------------------+
 
-|ci| |pypi| |conda|
 
-|coveralls| |readthedocs| |zenodo|
-
-.. |downloads|    image:: https://static.pepy.tech/badge/petl
+.. |pypi_downloads|    image:: https://static.pepy.tech/badge/petl
     :target: https://pepy.tech/project/petl
-    :alt: Downloads
+    :alt: PyPI Downloads
 
-.. |monthly|    image:: https://static.pepy.tech/badge/petl/month
+.. |pypi_monthly|    image:: https://static.pepy.tech/badge/petl/month
     :target: https://pepy.tech/project/petl
-    :alt: Downloads/Month
+    :alt: PyPI Downloads/Month
 
-.. |ci|    image:: https://github.com/petl-developers/petl/actions/workflows/test-changes.yml/badge.svg
+.. |conda_downloads|    image:: https://img.shields.io/conda/dn/conda-forge/petl.svg
+    :target: https://anaconda.org/conda-forge/petl
+    :alt: Conda Downloads
+
+.. |conda_version|    image:: https://img.shields.io/conda/vn/conda-forge/petl.svg
+  :target: https://github.com/petl-developers/petl/releases
+  :alt: Petl releases
+
+.. |ga_tests|    image:: https://github.com/petl-developers/petl/actions/workflows/test-changes.yml/badge.svg
     :target: https://github.com/petl-developers/petl/actions/workflows/test-changes.yml
     :alt: Continuous Integration build status
 
-.. |pypi|    image:: https://github.com/petl-developers/petl/actions/workflows/publish-release.yml/badge.svg
+.. |ga_release|    image:: https://github.com/petl-developers/petl/actions/workflows/publish-release.yml/badge.svg
     :target: https://github.com/petl-developers/petl/actions/workflows/publish-release.yml
     :alt: PyPI release status
 
-.. |conda|    image:: https://github.com/conda-forge/petl-feedstock/actions/workflows/automerge.yml/badge.svg
-    :target: https://github.com/conda-forge/petl-feedstock/actions/workflows/automerge.yml
+.. |ga_conda|    image:: https://github.com/conda-forge/petl-feedstock/actions/workflows/conda-build.yml/badge.svg
+    :target: https://github.com/conda-forge/petl-feedstock/actions/workflows/conda-build.yml
     :alt: Conda Forge release status
 
-.. |readthedocs|    image:: https://readthedocs.org/projects/petl/badge/?version=stable
-    :target: http://petl.readthedocs.io/en/stable/?badge=stable
-    :alt: readthedocs.org release status
-
-.. |coveralls|    image:: https://coveralls.io/repos/github/petl-developers/petl/badge.svg?branch=master
+.. |ci_coveralls|    image:: https://coveralls.io/repos/github/petl-developers/petl/badge.svg?branch=master
     :target: https://coveralls.io/github/petl-developers/petl?branch=master
     :alt: Coveralls release status
 
+.. |ci_readthedocs|    image:: https://readthedocs.org/projects/petl/badge/?version=stable
+    :target: http://petl.readthedocs.io/en/stable/?badge=stable
+    :alt: readthedocs.org release status
+
 .. |zenodo|    image:: https://zenodo.org/badge/2233194.svg
-   :target: https://zenodo.org/badge/latestdoi/2233194
+    :target: https://zenodo.org/badge/latestdoi/2233194
+    :alt: Zenodo Publication
