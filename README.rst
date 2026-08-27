@@ -48,7 +48,7 @@ DevOps Status
 
 .. |conda_version|    image:: https://img.shields.io/conda/vn/conda-forge/petl.svg
   :target: https://github.com/petl-developers/petl/releases
-  :alt: PyPI Downloads/Month
+  :alt: Petl releases
 
 .. |ga_tests|    image:: https://github.com/petl-developers/petl/actions/workflows/test-changes.yml/badge.svg
     :target: https://github.com/petl-developers/petl/actions/workflows/test-changes.yml
