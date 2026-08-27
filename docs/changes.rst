@@ -1,13 +1,43 @@
 Changes
 =======
 
+Version 1.7.25
+--------------
+
+* chore: improve CI/CD workflows, update documentation
+  By :user:`juarezr`, :issue:`709`.
+* feat: add truncate argument to todb function
+  By :user:`ChrisJr404`, :issue:`669`.
+
+Version 1.7.24
+--------------
+
+* fix: Fix avro decimal precision and scale inferred from Decimal values
+  By :user:`gaoflow`, :issue:`706`.
+
+Version 1.7.23
+--------------
+
+* fix: Fix cache/complement/index/skip attributes shadowing Table methods
+  By :user:`gaoflow`, :issue:`705`.
+
+Version 1.7.22
+--------------
+
+* fix: Fix header instance attribute shadowing Table.header across views
+  By :user:`gaoflow`, :issue:`704`.
+
+Version 1.7.21
+--------------
+
+* fix: Fix filldown RuntimeError on header-only tables
+  By :user:`sarathfrancis90`, :issue:`698`.
+* fix: Fix DictsView.dicts instance attr shadowing Table.dicts method
+  By :user:`gaoflow`, :issue:`697`.
+
 Version 1.7.20
 --------------
 
-## Whats Changed
-
-* feat: add truncate argument to todb function
-  By :user:`ChrisJr404`, :issue:`669`.
 * Fix filldown RuntimeError on header-only tables
   By :user:`sarathfrancis90`, :issue:`698`.
 * feat: modernize python dependencies in CI
@@ -16,15 +46,11 @@ Version 1.7.20
 Version 1.7.19
 --------------
 
-## Whats Changed
-
 * Add drop=if_exists support to todb
   By :user:`akashmalbari`, :issue:`695`.
 
 Version 1.7.18
 --------------
-
-## Whats Changed
 
 * Fix tojson() output for stdin-backed CSV input
   By :user:`akashmalbari`, :issue:`693`.
@@ -33,8 +59,6 @@ Version 1.7.18
 
 Version 1.7.17
 --------------
-
-## Whats Changed
 
 * ci: added readthedocs settings file
   By :user:`juarezr`, :issue:`677`.
