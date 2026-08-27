@@ -169,6 +169,11 @@ cython_debug/
 .ipynb_checkpoints/
 **/.ipynb_checkpoints/*
 
+# uv tools generated files
+.uv/
+uv.lock
+esbonio.*
+
 # Editor backup files 
 *~
 *.backup
